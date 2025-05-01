@@ -31,7 +31,7 @@ function setupClient(client) {
 	client.skipPager = true;
 	client.keepAbove = true;
 	// client.setMaximize(true, true);
-	client.fullScreen = true;
+	client.fullScreen = false;
 	printClient(client);
 }
 
@@ -47,7 +47,33 @@ function printClient(client) {
 		"");
 }
 
+function getCursorScreen() {
+	// Get current mouse position
+	var cursorPos = workspace.cursorPos;
+	var targetScreen = -1;
+	// Check each screen's geometry to find where the cursor is
+	for (var i = 0; i < workspace.screens.length; ++i) {
+		var screenGeom = workspace.clientArea(KWin.ScreenArea, workspace.screens[i], workspace.currentDesktop);
+		if (cursorPos.x >= screenGeom.x && cursorPos.x < screenGeom.x + screenGeom.width &&
+			cursorPos.y >= screenGeom.y && cursorPos.y < screenGeom.y + screenGeom.height) {
+			targetScreen = workspace.screens[i];
+			break;
+		}
+	}
+	return targetScreen;
+}
+
+function moveclientToScreen(client, targetScreen) {
+	if (client && client.moveable) {
+		// Move the window if target screen is valid and different from current
+		if (targetScreen !== -1 && targetScreen !== client.screen) {
+			workspace.sendClientToScreen(client, targetScreen);
+		}
+	}
+}
+
 function show(client) {
+
 	client.minimized = false;
 }
 
@@ -57,9 +83,11 @@ function hide(client) {
 
 function toggleAlacritty() {
 	let alacritty = findAlacritty();
-	if ( alacritty ) {
-		if ( isVisible(alacritty) ) {
-			if ( isActive(alacritty) ) {
+	if (alacritty) {
+		var screen = getCursorScreen();
+		moveclientToScreen(alacritty, screen);
+		if (isVisible(alacritty)) {
+			if (isActive(alacritty)) {
 				hide(alacritty);
 			} else {
 				activate(alacritty);
@@ -72,7 +100,7 @@ function toggleAlacritty() {
 }
 
 function setupAlacritty(client) {
-	if ( isAlacritty(client) ) {
+	if (isAlacritty(client)) {
 		setupClient(client);
 		printClient(client);
 	}
@@ -80,7 +108,7 @@ function setupAlacritty(client) {
 
 function init() {
 	let alacritty = findAlacritty();
-	if ( alacritty ) {
+	if (alacritty) {
 		setupClient(alacritty);
 	}
 
@@ -89,4 +117,3 @@ function init() {
 }
 
 init();
-
