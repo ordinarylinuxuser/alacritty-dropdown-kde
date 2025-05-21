@@ -30,8 +30,19 @@ function setupClient(client) {
 	client.skipSwitcher = true;
 	client.skipPager = true;
 	client.keepAbove = true;
-	// client.setMaximize(true, true);
 	client.fullScreen = false;
+	var previousScreen = client.output.name;
+	var heightPer = 90;
+	var widthPer = 90;
+	//initial resize
+	resizeBasedOnScreenArea(client, heightPer, widthPer);
+	client.clientGeometryChanged.connect(function () {
+		var currentScreen = client.output.name;
+		if (previousScreen !== currentScreen) {
+			resizeBasedOnScreenArea(client, heightPer, widthPer);
+			previousScreen = client.output.name;
+		}
+	});
 	printClient(client);
 }
 
@@ -72,6 +83,28 @@ function moveclientToScreen(client, targetScreen) {
 	}
 }
 
+function resizeBasedOnScreenArea(client, widthPercent, heightPercent) {
+	if (client && client.moveable) {
+		// Get the available screen area for the client's monitor
+		var area = workspace.clientArea(0, client);
+
+		// Calculate new dimensions 
+		var newWidth = area.width * (widthPercent / 100);
+		var newHeight = area.height * (heightPercent / 100);
+		var newX = area.x + ((area.width - newWidth) / 2);   // Center horizontally
+		var newY = (area.height - newHeight) / 2; // Center vertically
+
+		// Update the window geometry (centered)
+		client.frameGeometry = {
+			x: newX,
+			y: newY,
+			width: newWidth,
+			height: newHeight
+		};
+
+	}
+}
+
 function show(client) {
 
 	client.minimized = false;
@@ -84,8 +117,7 @@ function hide(client) {
 function toggleAlacritty() {
 	let alacritty = findAlacritty();
 	if (alacritty) {
-		var screen = getCursorScreen();
-		moveclientToScreen(alacritty, screen);
+		moveclientToScreen(alacritty, getCursorScreen());
 		if (isVisible(alacritty)) {
 			if (isActive(alacritty)) {
 				hide(alacritty);
