@@ -2,6 +2,10 @@
 # vim:tabstop=4:shiftwidth=4:noexpandtab
 */
 
+var firstRun = true;
+var heightPer = 90;
+var widthPer = 90;
+
 function isAlacritty(client) {
 	return client && !client.deleted && client.normalWindow && client.resourceName.toString() === "alacritty";
 }
@@ -21,6 +25,10 @@ function isActive(client) {
 
 function activate(client) {
 	workspace.activeWindow = client;
+	if (firstRun) {
+		resizeBasedOnScreenArea(client, 90, 90);
+		firstRun = false;
+	}
 }
 
 function setupClient(client) {
@@ -32,10 +40,7 @@ function setupClient(client) {
 	client.keepAbove = true;
 	client.fullScreen = false;
 	var previousScreen = client.output.name;
-	var heightPer = 90;
-	var widthPer = 90;
 	//initial resize
-	resizeBasedOnScreenArea(client, heightPer, widthPer);
 	client.clientGeometryChanged.connect(function () {
 		var currentScreen = client.output.name;
 		if (previousScreen !== currentScreen) {
@@ -106,7 +111,6 @@ function resizeBasedOnScreenArea(client, widthPercent, heightPercent) {
 }
 
 function show(client) {
-
 	client.minimized = false;
 }
 
