@@ -96,8 +96,13 @@ function resizeBasedOnScreenArea(client, widthPercent, heightPercent) {
 		// Calculate new dimensions 
 		var newWidth = area.width * (widthPercent / 100);
 		var newHeight = area.height * (heightPercent / 100);
-		var newX = area.x + ((area.width - newWidth) / 2);   // Center horizontally
-		var newY = (area.height - newHeight) / 2; // Center vertically
+
+		// Center horizontally: Add area.x to offset from the left monitors
+		var newX = area.x + ((area.width - newWidth) / 2);
+
+		// Center vertically: Add area.y to offset from the top monitors
+		// This fixes the issue on vertically stacked monitors
+		var newY = area.y + ((area.height - newHeight) / 2);
 
 		// Update the window geometry (centered)
 		client.frameGeometry = {
@@ -106,7 +111,6 @@ function resizeBasedOnScreenArea(client, widthPercent, heightPercent) {
 			width: newWidth,
 			height: newHeight
 		};
-
 	}
 }
 
